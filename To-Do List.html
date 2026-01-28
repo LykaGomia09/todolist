@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bear-Themed To-Do List</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #f6ede0;
+      background-image: url('https://img.freepik.com/premium-vector/big-brown-gingham-checkerboard-aesthetic-checkers-background-illustration-perfect-wallpaper-backdrop-postcard-background_565280-641.jpg');
+      background-size: cover;
+      background-blend-mode: color-burn;
+      background-position: center;
+      padding: 20px;
+      color: #4e3b2b;
+    }
+
+    .container-wrapper {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .container, .summary-container {
+      background-color: rgba(255, 248, 237, 0.95);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .container { max-width: 600px; flex: 1; }
+    .summary-container { max-width: 300px; flex: 1; overflow-y: auto; }
+
+    h1, h2 {
+      text-align: center;
+      font-family: 'Trebuchet MS', sans-serif;
+      margin-bottom: 20px;
+      color: #8b5c2b;
+    }
+
+    .input-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-section input {
+      flex: 1 1 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #d0b49f;
+      border-radius: 10px;
+      background-color: #fff9f2;
+    }
+
+    .datetime-inputs {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .datetime-inputs input { flex: 1; }
+
+    #add-task-btn, #clear-all-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #c89b6f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #add-task-btn:hover, #clear-all-btn:hover { background-color: #b27e52; }
+
+    ul { list-style-type: none; padding: 0; }
+
+    li {
+      background-color: #fff4e6;
+      border: 1px solid #e0c9b0;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .task-content {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .task-text {
+      flex: 1 1 100%;
+      word-break: break-word;
+      font-size: 16px;
+    }
+
+    .task-deadline {
+      flex: 1 1 100%;
+      font-size: 14px;
+      font-weight: bold;
+      color: #5a3d1a;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .task-actions button {
+      padding: 6px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .delete-btn {
+      background-color: #a84e4e;
+      color: white;
+    }
+
+    .delete-btn:hover { background-color: #913f3f; }
+
+    .complete-btn, .star-btn {
+      background-color: #a1754e;
+      color: white;
+    }
+
+    .complete-btn:hover, .star-btn:hover { background-color: #805d3f; }
+
+    li.completed .task-text {
+      text-decoration: line-through;
+      color: #bfa898;
+    }
+
+    .summary-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 0;
+      background-color: #d1a77d;
+      color: white;
+      border-radius: 10px;
+      margin-top: 25px;
+    }
+
+    .category-header {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 15px;
+      color: #5a3d1a;
+      font-size: 16px;
+    }
+
+    .summary-task {
+      margin: 5px 10px 10px 10px;
+      padding: 5px 10px;
+      background-color: #fff8f1;
+      border-left: 5px solid #c89b6f;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .edit-text, .edit-date, .edit-time {
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid #d0b49f;
+      border-radius: 6px;
+      margin-top: 4px;
+      width: 100%;
+    }
+
+    .task-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  background-color: #e4c4a0;
+  color: #4e3b2b;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tab-btn:hover {
+  background-color: #d1a077;
+}
+
+.selected-tab {
+  background-color: #c89b6f !important;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container-wrapper">
+    <div class="container">
+      <h1>🐻 To-Do List</h1>
+      <div class="input-section">
+        <input type="text" id="task-input" placeholder="Enter bear task..." />
+        <div class="datetime-inputs">
+          <input type="date" id="deadline-date" />
+          <input type="time" id="deadline-time" />
+        </div>
+        <button id="add-task-btn">Add Task</button>
+      </div>
+      <div class="task-tabs">
+        <button class="tab-btn selected-tab" id="ongoing-tab">On-Going Tasks</button>
+        <button class="tab-btn" id="completed-tab">Completed Tasks</button>
+      </div>
+      <ul id="task-list"></ul>
+      <button id="clear-all-btn">Clear All Tasks</button>
+    </div>
+
+    <div class="summary-container">
+      <h2>📅 Task Summary</h2>
+      <div id="task-summary"></div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = () => loadTasksFromLocalStorage();
+
+    document.getElementById('ongoing-tab').addEventListener('click', () => switchTab('ongoing-tab'));
+    document.getElementById('completed-tab').addEventListener('click', () => switchTab('completed-tab'));
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('selected-tab'));
+      document.getElementById(tabId).classList.add('selected-tab');
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      renderTasks(tasks);
+    }
+
+
+    document.getElementById('add-task-btn').onclick = () => {
+      const taskText = document.getElementById('task-input').value.trim();
+      const date = document.getElementById('deadline-date').value;
+      const time = document.getElementById('deadline-time').value;
+
+      if (!taskText || !date || !time) {
+        alert("Please enter a task, date, and time.");
+        return;
+      }
+
+      if (isTaskDuplicate(taskText)) {
+        alert("This task already exists!");
+        return;
+      }
+
+      const deadline = new Date(`${date}T${time}`);
+      addTaskToList({ text: taskText, deadline: deadline.toISOString(), completed: false, priority: false });
+      saveTasksToLocalStorage();
+      clearInputs();
+    };
+
+    function addTaskToList(taskObj) {
+      const li = document.createElement('li');
+      if (taskObj.completed) li.classList.add('completed');
+
+      const taskContent = document.createElement('div');
+      taskContent.className = 'task-content';
+
+      const taskText = document.createElement('div');
+      taskText.className = 'task-text';
+      taskText.textContent = taskObj.text;
+
+      const taskDeadline = document.createElement('div');
+      taskDeadline.className = 'task-deadline';
+      const date = new Date(taskObj.deadline);
+      taskDeadline.textContent = `Deadline: ${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+      taskContent.appendChild(taskText);
+      taskContent.appendChild(taskDeadline);
+
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'task-actions';
+
+      const completeBtn = document.createElement('button');
+      completeBtn.className = 'complete-btn';
+      completeBtn.textContent = 'Complete';
+      completeBtn.onclick = () => {
+        li.classList.toggle('completed');
+        updateTaskObjectAndSave(taskObj, li.classList.contains('completed'));
+      };
+
+      const starBtn = document.createElement('button');
+      starBtn.className = 'star-btn';
+      starBtn.textContent = taskObj.priority ? '★ Priority' : '☆ Make Priority';
+      starBtn.onclick = () => {
+        taskObj.priority = !taskObj.priority;
+        starBtn.textContent = taskObj.priority ? '★ Priority' : '☆ Make Priority';
+        saveTasksToLocalStorage();
+      };
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'star-btn';
+      editBtn.textContent = 'Edit';
+      let isEditing = false;
+      editBtn.onclick = () => {
+        if (!isEditing) {
+          const textInput = document.createElement('input');
+          textInput.type = 'text';
+          textInput.value = taskObj.text;
+          textInput.className = 'edit-text';
+
+          const dateInput = document.createElement('input');
+          dateInput.type = 'date';
+          dateInput.value = new Date(taskObj.deadline).toISOString().slice(0, 10);
+          dateInput.className = 'edit-date';
+
+          const timeInput = document.createElement('input');
+          timeInput.type = 'time';
+          timeInput.value = new Date(taskObj.deadline).toTimeString().slice(0, 5);
+          timeInput.className = 'edit-time';
+
+          taskText.innerHTML = '';
+          taskDeadline.innerHTML = '';
+          taskText.appendChild(textInput);
+          taskDeadline.appendChild(dateInput);
+          taskDeadline.appendChild(timeInput);
+
+          editBtn.textContent = 'Save';
+          isEditing = true;
+        } else {
+          const newText = li.querySelector('.edit-text').value.trim();
+          const newDate = li.querySelector('.edit-date').value;
+          const newTime = li.querySelector('.edit-time').value;
+
+          if (!newText || !newDate || !newTime) {
+            alert("All fields are required!");
+            return;
+          }
+
+          const newDeadline = new Date(`${newDate}T${newTime}`);
+          taskObj.text = newText;
+          taskObj.deadline = newDeadline.toISOString();
+
+          taskText.textContent = newText;
+          taskDeadline.textContent = `Deadline: ${newDeadline.toLocaleDateString()} ${newDeadline.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+          editBtn.textContent = 'Edit';
+          isEditing = false;
+
+          saveTasksToLocalStorage();
+        }
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.onclick = () => {
+        li.remove();
+        saveTasksToLocalStorage();
+      };
+
+      actionsDiv.appendChild(completeBtn);
+      actionsDiv.appendChild(starBtn);
+      actionsDiv.appendChild(editBtn);
+      actionsDiv.appendChild(deleteBtn);
+
+      li.appendChild(taskContent);
+      li.appendChild(actionsDiv);
+      document.getElementById('task-list').appendChild(li);
+    }
+
+    function saveTasksToLocalStorage() {
+      const tasks = [];
+      document.querySelectorAll('#task-list li').forEach(li => {
+        const text = li.querySelector('.task-text').textContent;
+        const deadlineText = li.querySelector('.task-deadline').textContent.replace('Deadline: ', '');
+        const deadline = new Date(deadlineText);
+        const completed = li.classList.contains('completed');
+        const starBtn = li.querySelector('.star-btn');
+        const priority = starBtn && starBtn.textContent.includes('★');
+        tasks.push({ text, deadline: deadline.toISOString(), completed, priority });
+      });
+
+      tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks(tasks);
+    }
+
+    function loadTasksFromLocalStorage() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      renderTasks(tasks);
+    }
+
+    function renderTasks(tasks) {
+      const taskList = document.getElementById('task-list');
+      const taskSummary = document.getElementById('task-summary');
+      taskList.innerHTML = '';
+      taskSummary.innerHTML = '';
+
+      const selectedTab = document.querySelector('.selected-tab').id;
+
+      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const grouped = {
+        priority: { 'Past Due': [], 'Deadline Today': [], 'Upcoming Deadline': [] },
+        normal: { 'Past Due': [], 'Deadline Today': [], 'Upcoming Deadline': [] }
+      };
+
+      tasks.forEach(task => {
+  const isCompleted = task.completed;
+
+ 
+  const showInCurrentTab = (selectedTab === 'ongoing-tab' && !isCompleted) || (selectedTab === 'completed-tab' && isCompleted);
+  if (showInCurrentTab) {
+    addTaskToList(task);
+  }
+
+  
+  if (!isCompleted) {
+    const deadline = new Date(task.deadline);
+    const group = task.priority ? grouped.priority : grouped.normal;
+    const taskItem = {
+      text: task.text,
+      time: deadline.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: deadline.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    };
+
+    if (deadline < now) group['Past Due'].push(taskItem);
+    else if (deadline.toDateString() === today.toDateString()) group['Deadline Today'].push(taskItem);
+    else group['Upcoming Deadline'].push(taskItem);
+  }
+});
+
+
+      const displayGroup = (title, group) => {
+        const summary = document.getElementById('task-summary');
+        const sectionTitle = document.createElement('div');
+        sectionTitle.className = 'summary-title';
+        sectionTitle.textContent = title;
+        summary.appendChild(sectionTitle);
+
+        ['Past Due', 'Deadline Today', 'Upcoming Deadline'].forEach(category => {
+          if (group[category].length > 0) {
+            const catTitle = document.createElement('div');
+            catTitle.className = 'category-header';
+            catTitle.textContent = category;
+            summary.appendChild(catTitle);
+
+            group[category].forEach(task => {
+              const taskLine = document.createElement('div');
+              taskLine.className = 'summary-task';
+              taskLine.innerHTML = `• ${task.text}<br><small>${task.date} ${task.time}</small>`;
+              summary.appendChild(taskLine);
+            });
+          }
+        });
+      };
+
+      if (Object.values(grouped.priority).some(arr => arr.length > 0)) displayGroup('⭐ Priority Tasks', grouped.priority);
+      if (Object.values(grouped.normal).some(arr => arr.length > 0)) displayGroup('📌 Normal Tasks', grouped.normal);
+    }
+
+
+    function isTaskDuplicate(taskText) {
+      return Array.from(document.querySelectorAll('.task-text')).some(task => task.textContent.trim() === taskText);
+    }
+
+    function clearInputs() {
+      document.getElementById('task-input').value = '';
+      document.getElementById('deadline-date').value = '';
+      document.getElementById('deadline-time').value = '';
+    }
+
+    function updateTaskObjectAndSave(taskObj, isNowCompleted) {
+      taskObj.completed = isNowCompleted;
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+      const updatedTasks = tasks.map(t =>
+        t.text === taskObj.text && t.deadline === taskObj.deadline ? taskObj : t
+      );
+
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      renderTasks(updatedTasks);
+    }
+
+
+    document.getElementById('clear-all-btn').onclick = () => {
+      if (confirm("Are you sure you want to clear all tasks?")) {
+        document.getElementById('task-list').innerHTML = "";
+        document.getElementById('task-summary').innerHTML = "";
+        localStorage.removeItem('tasks');
+      }
+    };
+  </script>
+</body>
+</html>
